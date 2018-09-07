@@ -24,17 +24,16 @@ thunder_file_min = 1
 thunder_file_max = 17
 
 loop_delay_min = 5
-loop_delay_max = 30
+loop_delay_max = 15
 
 def main():
   GPIO.setmode(GPIO.BOARD)
   GPIO.setup(led_pin, GPIO.OUT)
   pwm = GPIO.PWM(led_pin, 100)
   pwm.start(0)
-  pygame.init()
   pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
-  pygame.mixer.music.set_volume(0.4)
+  pygame.mixer.music.set_volume(0.05)
   pygame.mixer.music.play(loops=-1)
   while True:
     lightning_strike(pwm)
