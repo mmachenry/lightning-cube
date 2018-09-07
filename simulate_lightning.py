@@ -33,7 +33,7 @@ def main():
   pwm.start(0)
   pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
-  pygame.mixer.music.set_volume(0.05)
+  pygame.mixer.music.set_volume(0.09)
   pygame.mixer.music.play(loops=-1)
   while True:
     lightning_strike(pwm)
@@ -66,6 +66,7 @@ def lightning_strike(pwm):
   thunder_sound = pygame.mixer.Sound(filename)
   thunder_sound.play()
   time.sleep(thunder_sound.get_length())
+  thunder_sound.stop()
 
   loop_delay = random.uniform(loop_delay_min, loop_delay_max);
   print("Pausing before next loop, seconds: ", loop_delay)
