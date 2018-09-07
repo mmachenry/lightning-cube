@@ -1,5 +1,3 @@
-# This code is adapted from
-# https://oneguyoneblog.com/2017/11/01/lightning-thunder-arduino-halloween-diy/
 import random
 import time
 import pygame
@@ -31,11 +29,15 @@ loop_delay_max = 30
 def main():
   GPIO.setmode(GPIO.BOARD)
   GPIO.setup(led_pin, GPIO.OUT)
-  pwm = GPIO.PWM(led_pin, 100) # pulse at 100hz
+  pwm = GPIO.PWM(led_pin, 100)
   pwm.start(0)
+  pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
+  pygame.mixer.music.play(loops=-1)
   while True:
     lightning_strike(pwm)
   pwm.stop()
+  pygame.mixer.music.stop()
+  GPIO.cleanup()
 
 def lightning_strike(pwm):
   flash_count = random.randint(flash_count_min, flash_count_max)
@@ -57,7 +59,7 @@ def lightning_strike(pwm):
 
   thunder_file = random.uniform(thunder_file_min, thunder_file_max)
   print("Playing thunder sound, file number: ", thunder_file)
-  thunder_sound = pygame.mixer.Sound(str(thunder_file) + ".mp3")
+  thunder_sound = pygame.mixer.Sound("audio/" + thunder_file.zfill(4) + ".mp3")
   thunder_sound.play()
   while pygame.mixer.get_busy(): pass
   thunder_sound.stop()
