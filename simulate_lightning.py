@@ -3,6 +3,7 @@
 import random
 import time
 import pygame
+import RPi.GPIO as GPIO
 
 led_pin = 7
 
@@ -10,7 +11,7 @@ flash_count_min = 3
 flash_count_max = 15
 
 flash_brightness_min = 10
-flash_brightness_max = 255
+flash_brightness_max = 100
 
 flash_duration_min = 0.001
 flash_duration_max = 0.050
@@ -27,18 +28,27 @@ thunder_file_max = 17
 loop_delay_min = 5
 loop_delay_max = 30
 
+def main():
+  GPIO.setmode(GPIO.BOARD)
+  GPIO.setup(led_pin, GPIO.OUT)
+  pwm = GPIO.PWM(led_pin, 100) # pulse at 100hz
+  pwm.start(0)
+  while True:
+    lightning_strike()
+  pwm.stop()
+
 def lightning_strike():
   flash_count = random.randint(flash_count_min, flash_count_max)
 
   print ("Flashing. Count = ", flash_count)
 
   for flash in range(flash_count):
+    flash_brightness = random.randint(flash_brightness_min,flash_brightness_max)
     flash_duration = random.uniform(flash_duration_min, flash_duration_max)
-    next_flash_delay = random.uniform(next_flash_delay_min, next_flash_delay_max)
-    print ("high") # set pin to brightness with PWM
+    next_flash_delay = random.uniform(next_flash_delay_min,next_flash_delay_max)
+    pwm.ChangeDutyCycle(flash_brightness)
     time.sleep(flash_duration)
-    # set pin low
-    print ("low")
+    pwm.ChangeDutyCycle(0)
     time.sleep(next_flash_delay)
 
   thunder_delay = random.uniform(thunder_delay_min, thunder_delay_max)
@@ -57,5 +67,4 @@ def lightning_strike():
   time.sleep(loop_delay);
 
 if __name__ == '__main__':
-  while True:
-    lightning_strike()
+  main()
