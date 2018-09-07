@@ -34,10 +34,10 @@ def main():
   pwm = GPIO.PWM(led_pin, 100) # pulse at 100hz
   pwm.start(0)
   while True:
-    lightning_strike()
+    lightning_strike(pwm)
   pwm.stop()
 
-def lightning_strike():
+def lightning_strike(pwm):
   flash_count = random.randint(flash_count_min, flash_count_max)
 
   print ("Flashing. Count = ", flash_count)
