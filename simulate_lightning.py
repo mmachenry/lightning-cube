@@ -31,13 +31,17 @@ def main():
   GPIO.setup(led_pin, GPIO.OUT)
   pwm = GPIO.PWM(led_pin, 100)
   pwm.start(0)
+  pygame.init()
+  pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
+  pygame.mixer.music.set_volume(0.4)
   pygame.mixer.music.play(loops=-1)
   while True:
     lightning_strike(pwm)
   pwm.stop()
   pygame.mixer.music.stop()
   GPIO.cleanup()
+
 
 def lightning_strike(pwm):
   flash_count = random.randint(flash_count_min, flash_count_max)
@@ -57,11 +61,12 @@ def lightning_strike(pwm):
   print("Pausing before playing thunder sound, seconds: ", thunder_delay)
   time.sleep(thunder_delay);
 
-  thunder_file = random.uniform(thunder_file_min, thunder_file_max)
-  print("Playing thunder sound, file number: ", thunder_file)
-  thunder_sound = pygame.mixer.Sound("audio/" + thunder_file.zfill(4) + ".mp3")
+  thunder_file = random.randint(thunder_file_min, thunder_file_max)
+  filename = "audio/" + str(thunder_file).zfill(4) + ".ogg"
+  print("Playing thunder sound, file number: ", filename)
+  thunder_sound = pygame.mixer.Sound(filename)
   thunder_sound.play()
-  while pygame.mixer.get_busy(): pass
+  #while pygame.mixer.get_busy(): pass
   thunder_sound.stop()
 
   loop_delay = random.uniform(loop_delay_min, loop_delay_max);
