@@ -3,7 +3,7 @@ import time
 import pygame
 import RPi.GPIO as GPIO
 
-led_pin = 7
+led_pins = [7,9]
 
 flash_count_min = 3
 flash_count_max = 15
@@ -28,21 +28,24 @@ loop_delay_max = 15
 
 def main():
   GPIO.setmode(GPIO.BOARD)
-  GPIO.setup(led_pin, GPIO.OUT)
-  pwm = GPIO.PWM(led_pin, 100)
-  pwm.start(0)
+  pwms = []
+  for led_pin in led_pins:
+    GPIO.setup(led_pin, GPIO.OUT)
+    pwm = GPIO.PWM(led_pin, 100)
+    pwm.start(0)
+    pwms.push(pwm)
   pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
   pygame.mixer.music.set_volume(0.09)
   pygame.mixer.music.play(loops=-1)
   while True:
-    lightning_strike(pwm)
+    lightning_strike(pwms)
   pwm.stop()
   pygame.mixer.music.stop()
   GPIO.cleanup()
 
 
-def lightning_strike(pwm):
+def lightning_strike(pwms):
   flash_count = random.randint(flash_count_min, flash_count_max)
 
   print ("Flashing. Count = ", flash_count)
@@ -51,9 +54,11 @@ def lightning_strike(pwm):
     flash_brightness = random.randint(flash_brightness_min,flash_brightness_max)
     flash_duration = random.uniform(flash_duration_min, flash_duration_max)
     next_flash_delay = random.uniform(next_flash_delay_min,next_flash_delay_max)
-    pwm.ChangeDutyCycle(flash_brightness)
+    for pwm in pwms:
+      pwm.ChangeDutyCycle(flash_brightness)
     time.sleep(flash_duration)
-    pwm.ChangeDutyCycle(0)
+    for pwm in pwms:
+      pwm.ChangeDutyCycle(0)
     time.sleep(next_flash_delay)
 
   thunder_delay = random.uniform(thunder_delay_min, thunder_delay_max)
