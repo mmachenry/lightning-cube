@@ -3,7 +3,7 @@ import time
 import pygame
 import RPi.GPIO as GPIO
 
-led_pins = [7,9]
+led_pins = [8,10]
 
 flash_count_min = 3
 flash_count_max = 15
@@ -33,7 +33,7 @@ def main():
     GPIO.setup(led_pin, GPIO.OUT)
     pwm = GPIO.PWM(led_pin, 100)
     pwm.start(0)
-    pwms.push(pwm)
+    pwms.append(pwm)
   pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
   pygame.mixer.music.set_volume(0.09)
