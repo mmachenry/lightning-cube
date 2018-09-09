@@ -72,8 +72,8 @@ def lightning_strike(pwms):
   print("Playing thunder sound, file number: ", filename)
   thunder_sound = pygame.mixer.Sound(filename)
   thunder_sound.play()
-  time.sleep(thunder_sound.get_length())
-  thunder_sound.stop()
+  #time.sleep(thunder_sound.get_length())
+  #thunder_sound.stop()
 
   loop_delay = random.uniform(loop_delay_min, loop_delay_max);
   print("Pausing before next loop, seconds: ", loop_delay)
