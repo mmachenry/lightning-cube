@@ -4,6 +4,10 @@ import random
 import time
 import pygame
 import RPi.GPIO as GPIO
+import serial
+import threading
+
+storm_intensity = 0.5
 
 led_pins = [8,10]
 
@@ -30,22 +34,33 @@ loop_delay_max = 15
 
 def main():
   GPIO.setmode(GPIO.BOARD)
+  threading.Thread(target=read_serial)
   pwms = []
+
   for led_pin in led_pins:
     GPIO.setup(led_pin, GPIO.OUT)
     pwm = GPIO.PWM(led_pin, 100)
     pwm.start(0)
     pwms.append(pwm)
+
   pygame.mixer.init()
   pygame.mixer.music.load("audio/heavy-rain-daniel_simon.mp3")
   pygame.mixer.music.set_volume(0.09)
   pygame.mixer.music.play(loops=-1)
+
   while True:
-    lightning_strike(pwms)
+    lightning_strike(pwms, tty)
+
   pwm.stop()
   pygame.mixer.music.stop()
   GPIO.cleanup()
 
+def read_serial():
+  tty = serial.Serial("/dev/ttyS0", 9600)
+  while True:
+    message = tty.readline()
+    storm_intensity = 0.5
+    print (message)
 
 def lightning_strike(pwms):
   flash_count = random.randint(flash_count_min, flash_count_max)
