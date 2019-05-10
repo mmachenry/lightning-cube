@@ -49,7 +49,7 @@ def main():
   pygame.mixer.music.play(loops=-1)
 
   while True:
-    lightning_strike(pwms, tty)
+    lightning_strike(pwms)
 
   pwm.stop()
   pygame.mixer.music.stop()
