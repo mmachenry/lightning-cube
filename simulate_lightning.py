@@ -7,7 +7,7 @@ import RPi.GPIO as GPIO
 import serial
 import threading
 
-storm_intensity = 0.5
+storm_intensity = 50
 
 led_pins = [8,10]
 
@@ -59,7 +59,6 @@ def read_serial():
   tty = serial.Serial("/dev/ttyS0", 9600)
   while True:
     message = tty.readline()
-    storm_intensity = 0.5
     print (message)
 
 def lightning_strike(pwms):
