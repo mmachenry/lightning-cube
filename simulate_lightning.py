@@ -3,7 +3,7 @@
 import random
 import time
 import pygame
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import serial
 import threading
 
@@ -12,7 +12,7 @@ MIN_INTENSITY = 10
 MID_INTENSITY = (MAX_INTENSITY - MIN_INTENSITY) / 2 + MIN_INTENSITY
 storm_intensity = MID_INTENSITY
 
-LED_PINS = [8,10]
+LED_PINS = [19,21]
 
 heavy_thunder = [
     "heavy-thunder-01.ogg",
@@ -53,21 +53,23 @@ rain = [
     ]
 
 def main():
-    threading.Thread(target=read_serial)
+    serial_thread = threading.Thread(target=read_serial)
+    serial_thread.start()
     pwms = []
 
-#    GPIO.setmode(GPIO.BOARD)
-#    for led_pin in LED_PINS:
-#        GPIO.setup(led_pin, GPIO.OUT)
-#        pwm = GPIO.PWM(led_pin, 100)
-#        pwm.start(0)
-#        pwms.append(pwm)
+    GPIO.setmode(GPIO.BOARD)
+    for led_pin in LED_PINS:
+        GPIO.setup(led_pin, GPIO.OUT)
+        pwm = GPIO.PWM(led_pin, 100)
+        pwm.start(0)
+        pwms.append(pwm)
 
     pygame.mixer.init()
-    pygame.mixer.music.load("audio/" + rain[1])
+    pygame.mixer.music.load("audio/" + rain[2])
     pygame.mixer.music.play(loops=-1)
 
     while True:
+        print ("Looping with storm_intensity=", storm_intensity)
         thunder_and_lightning(pwms, storm_intensity)
         pause_between(storm_intensity)
 
@@ -78,22 +80,34 @@ def cleanup (pwms):
     GPIO.cleanup()
 
 def read_serial():
+    global storm_intensity
     tty = serial.Serial("/dev/ttyS0", 9600)
+    print ("Reading serial data")
     while True:
         message = tty.readline()
         print (message)
-        storm_intensity = int(message)
+        try:
+            value = int(message)
+            storm_intensity = value
+            print ("storm_intensity set to ", storm_intensity)
+        except ValueError as err:
+            print (err)
+        except:
+            print ("Unexpected error")
 
 def thunder_and_lightning (pwms, intensity):
     lightning(pwms, intensity)
-    time.sleep(scale_to_intensity(intensity, 10, 0))
+    gap = scale_to_intensity(intensity, 10, 0)
+    print ("Delaying ", gap, " between light and sound")
+    time.sleep(gap)
     thunder(intensity)
  
 def lightning(pwms, intensity):
     count = random.randint(1, 7)
+    brightness = random_scale_to_intensity(intensity, 20, 95, 10)
+    print ("Strike: ", count, " times at ", brightness)
 
     for flash in range(count):
-        brightness = random_scale_to_intensity(intensity, 20, 95, 10)
         duration = random.uniform(0.001, 0.05)
         next_delay = random.uniform(0.001, 0.15)
 
@@ -113,7 +127,9 @@ def thunder (intensity):
         filename += random.choice(distant_thunder)
 
     sound = pygame.mixer.Sound(filename)
-    sound.set_volume(random_scale_to_intensity(intensity, 0.525, 0.975, 0.05))
+    volume = random_scale_to_intensity(intensity, 0.525, 0.975, 0.05)
+    sound.set_volume(volume)
+    print ("Playing: ", filename, " at ", volume, " volume")
     sound.play()
 
 def pause_between (intensity):
