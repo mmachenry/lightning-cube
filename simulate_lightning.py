@@ -7,8 +7,8 @@ import RPi.GPIO as GPIO
 import serial
 import threading
 
-MAX_INTENSITY = 150
-MIN_INTENSITY = 10
+MAX_INTENSITY = 100
+MIN_INTENSITY = 0
 MID_INTENSITY = (MAX_INTENSITY - MIN_INTENSITY) / 2 + MIN_INTENSITY
 storm_intensity = MID_INTENSITY
 
@@ -53,8 +53,7 @@ rain = [
     ]
 
 def main():
-    serial_thread = threading.Thread(target=read_serial)
-    serial_thread.start()
+    tty = serial.Serial("/dev/ttyS0", 9600)
     pwms = []
 
     GPIO.setmode(GPIO.BOARD)
@@ -69,6 +68,12 @@ def main():
     pygame.mixer.music.play(loops=-1)
 
     while True:
+        data = read_serial(tty)
+        if data is None:
+            storm_intensity = 50
+        else:
+            storm_intensity = data
+
         print ("Looping with storm_intensity=", storm_intensity)
         thunder_and_lightning(pwms, storm_intensity)
         pause_between(storm_intensity)
@@ -79,21 +84,12 @@ def cleanup (pwms):
     pygame.mixer.music.stop()
     GPIO.cleanup()
 
-def read_serial():
-    global storm_intensity
-    tty = serial.Serial("/dev/ttyS0", 9600)
-    print ("Reading serial data")
-    while True:
-        message = tty.readline()
-        print (message)
-        try:
-            value = int(message)
-            storm_intensity = value
-            print ("storm_intensity set to ", storm_intensity)
-        except ValueError as err:
-            print (err)
-        except:
-            print ("Unexpected error")
+def read_serial(tty):
+    value = None
+    while tty.in_waiting > 0:
+        value = ord(tty.read(size=1))
+        #print ("value=",value)
+    return value
 
 def thunder_and_lightning (pwms, intensity):
     lightning(pwms, intensity)
@@ -121,7 +117,7 @@ def lightning(pwms, intensity):
 def thunder (intensity):
     filename = "audio/"
 
-    if intensity > MID_INTENSITY:
+    if intensity >= MID_INTENSITY:
         filename += random.choice(heavy_thunder)
     else:
         filename += random.choice(distant_thunder)
@@ -133,7 +129,9 @@ def thunder (intensity):
     sound.play()
 
 def pause_between (intensity):
-    time.sleep(random_scale_to_intensity(intensity, 15, 5, 3))
+    t = random_scale_to_intensity(intensity, 15, 2, 2)
+    print ("Delay ", t, " seconds between stikes.")
+    time.sleep(t)
 
 def random_scale_to_intensity(intensity, lower, upper, band):
     mid_range = scale_to_intensity(intensity, lower, upper)
