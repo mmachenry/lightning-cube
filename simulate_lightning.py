@@ -14,6 +14,8 @@ storm_intensity = MID_INTENSITY
 
 LED_PINS = [19,21]
 
+AUDIO_DIR = "/home/pi/lightning-cube/audio"
+
 heavy_thunder = [
     "heavy-thunder-01.ogg",
     "heavy-thunder-02.ogg",
@@ -64,7 +66,7 @@ def main():
         pwms.append(pwm)
 
     pygame.mixer.init()
-    pygame.mixer.music.load("audio/" + rain[2])
+    pygame.mixer.music.load(AUDIO_DIR + "/" + rain[2])
     pygame.mixer.music.play(loops=-1)
 
     while True:
@@ -115,7 +117,7 @@ def lightning(pwms, intensity):
         time.sleep(next_delay)
 
 def thunder (intensity):
-    filename = "audio/"
+    filename = AUDIO_DIR + "/"
 
     if intensity >= MID_INTENSITY:
         filename += random.choice(heavy_thunder)
